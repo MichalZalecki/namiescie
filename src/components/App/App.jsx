@@ -8,29 +8,29 @@ class App extends React.Component {
   constructor(props) {
     super(props);
 
-    this.socket = io("//localhost:3000");
+    this.socket = io("https://namiescie-api.herokuapp.com");
     this.socket.on("people", others => this.setState({ others: others.filter(person => person.id !== this.state.me.id) }));
     this.socket.on("getNotified", person => this.handleGetNotified(person));
     this.socket.on("place", place => this.handlePlace(place));
 
     this.maleImg = {
       url: require("app/img/male.png"),
-      size: new google.maps.Size(255, 255)
+      scaledSize: new google.maps.Size(40, 70),
     };
 
     this.femaleImg = {
       url: require("app/img/female.png"),
-      size: new google.maps.Size(255, 255)
+      scaledSize: new google.maps.Size(40, 70),
     };
 
     this.meImg = {
       url: require("app/img/me.png"),
-      size: new google.maps.Size(255, 255)
+      scaledSize: new google.maps.Size(40, 70),
     };
 
     this.placeImg = {
       url: require("app/img/place.png"),
-      size: new google.maps.Size(255, 255)
+      scaledSize: new google.maps.Size(40, 70),
     };
 
     this.state = {

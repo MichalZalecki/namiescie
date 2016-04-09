@@ -16,7 +16,7 @@ class Overlay extends React.Component {
       case "start":
         return (
           <div className={ cls.overlay }>
-            <button className={ cls.start } onClick={ this.props.start }>#namiasto</button>
+            <button className={ cls.start } onClick={ this.props.start }>#namiescie</button>
           </div>
         );
       case "selectSex":
