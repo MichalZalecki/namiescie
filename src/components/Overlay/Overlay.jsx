@@ -3,6 +3,7 @@ import cls from "./Overlay.css";
 
 class Overlay extends React.Component {
   static propTypes = {
+    data: React.PropTypes.object,
     step: React.PropTypes.string,
     start: React.PropTypes.func.isRequired,
     selectSex: React.PropTypes.func.isRequired,
@@ -58,6 +59,12 @@ class Overlay extends React.Component {
                 <i className="fa fa-thumbs-down"></i>
               </button>
             </div>
+          </div>
+        );
+      case "place":
+        return (
+          <div className={ cls.overlay }>
+            <h1 className={ cls.placeTitle }>{ this.props.data.name }</h1>
           </div>
         );
       default:

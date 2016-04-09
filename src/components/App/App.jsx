@@ -130,8 +130,8 @@ class App extends React.Component {
       .then(directions => this.setState({ directions }));
   }
 
-  chooseStep(step) {
-    this.setState({overlay: { ...this.state.overlay, step }});
+  chooseStep(step, data) {
+    this.setState({overlay: { ...this.state.overlay, step, data }});
   }
 
   closeOverlay() {
@@ -160,6 +160,7 @@ class App extends React.Component {
     return (
       <div className={ cls.app }>
         <Overlay
+          data={ this.state.overlay.data }
           step={ this.state.overlay.step }
           start={ ::this.start }
           selectSex={ ::this.selectSex }
