@@ -28,7 +28,8 @@ class App extends React.Component {
           lng: 17.009627,
         }
       },
-      party: {},
+      party: null,
+      place: null,
       overlay: {
         step: "selectSex"
       },
@@ -78,6 +79,12 @@ class App extends React.Component {
   acceptPing() {
     console.log("I've accepted ping", this.state.party);
     this.closeOverlay();
+    this.handlePlace({
+      position: {
+        lat: 51.085037,
+        lng: 17.010703
+      }
+    });
   }
 
   rejectPing() {
@@ -96,6 +103,15 @@ class App extends React.Component {
     this.setState({ me: { ...this.state.me, tag } });
     // load people with matching tag
     this.closeOverlay();
+  }
+
+  handlePlace(place) {
+    console.log("Place has been choosed", place);
+    this.setState({
+      place,
+      others: [],
+      map: { ...this.state.map, center: place.position, zoom: 20 }
+    });
   }
 
   chooseStep(step) {
@@ -130,9 +146,6 @@ class App extends React.Component {
               zoom={ this.state.map.zoom }
               center={ this.state.map.center }
             >
-              <Marker
-                position={ this.state.me.position }
-              />
               {
                 this.state.others.map(attrs => <Marker
                   key={ attrs.id }
@@ -140,6 +153,9 @@ class App extends React.Component {
                   onClick={ () => this.pingUser(attrs) }
                 />)
               }
+              { this.state.me ? <Marker position={ this.state.me.position } /> : null }
+              { this.state.place ? <Marker position={ this.state.place.position } /> : null }
+              { this.state.party ? <Marker position={ this.state.party.position } /> : null }
             </GoogleMap>
           }
         />
