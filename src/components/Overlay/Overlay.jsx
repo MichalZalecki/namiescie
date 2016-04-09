@@ -7,8 +7,8 @@ class Overlay extends React.Component {
     start: React.PropTypes.func.isRequired,
     selectSex: React.PropTypes.func.isRequired,
     selectTag: React.PropTypes.func.isRequired,
-    acceptPing: React.PropTypes.func.isRequired,
-    rejectPing: React.PropTypes.func.isRequired,
+    acceptNotification: React.PropTypes.func.isRequired,
+    rejectNotification: React.PropTypes.func.isRequired,
   };
 
   render() {
@@ -46,15 +46,15 @@ class Overlay extends React.Component {
             </ul>
           </div>
         );
-      case "handlePing":
+      case "handleGetNotified":
         return (
           <div className={ cls.overlay }>
             <div className={ cls.yesNoButtons }>
               <h1 className={ cls.yesNoTitle }>idziemy?</h1>
-              <button className={ cls.yesNoButton } onClick={ this.props.acceptPing }>
+              <button className={ cls.yesNoButton } onClick={ this.props.acceptNotification }>
                 <i className="fa fa-thumbs-up"></i>
               </button>
-              <button className={ cls.yesNoButton } onClick={ this.props.rejectPing }>
+              <button className={ cls.yesNoButton } onClick={ this.props.rejectNotification }>
                 <i className="fa fa-thumbs-down"></i>
               </button>
             </div>

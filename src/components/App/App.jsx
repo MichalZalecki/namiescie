@@ -8,20 +8,25 @@ class App extends React.Component {
   constructor(props) {
     super(props);
 
-    setTimeout(() => {
-      this.handlePing(this.state.others[0]);
-    }, 10000);
+    // setTimeout(() => {
+    //   this.handlePing(this.state.others[0]);
+    // }, 10000);
 
     this.socket = io("//localhost:3000");
-    this.socket.on("people", others => this.setState({ others }));
+    this.socket.on("people", others => this.setState({ others: others.filter(person => person.id !== this.state.me.id) }));
+    this.socket.on("getNotified", person => this.handleGetNotified(person));
+    this.socket.on("place", place => this.handlePlace(place));
 
     this.state = {
       me: {
         id: uuid.v4(),
         sex: "male",
-        position: {
+        position: Math.random() > 0.5 ? {
           lat: 51.085695,
           lng: 17.008352,
+        } : {
+          lat: 51.082818,
+          lng: 17.015146,
         }
       },
       map: {
@@ -45,34 +50,42 @@ class App extends React.Component {
     this.chooseStep("selectSex");
   }
 
-  pingUser(person) {
-    console.log("I've pinged someone");
+  notifyUser(person) {
+    console.log("I've notified someone", person);
+    this.socket.emit("notify", {
+      sourceId: this.state.me.id,
+      destinationId: person.id,
+    });
   }
 
-  handlePing(person) {
-    console.log("Someone has pinged");
+  handleGetNotified(person) {
+    console.log("Someone has notified me", person);
 
     this.setState({
       party: person,
       map: { ...this.state.map, center: person.position, zoom: 18 }
     });
-    this.chooseStep("handlePing");
+    this.chooseStep("handleGetNotified");
   }
 
-  acceptPing() {
-    console.log("I've accepted ping", this.state.party);
+  acceptNotification() {
+    console.log("I've accepted", this.state.party);
     this.closeOverlay();
-    this.handlePlace({
-      position: {
-        lat: 51.085037,
-        lng: 17.010703
-      }
+    this.socket.emit("acceptNotification", {
+      sourceId: this.state.me.id,
+      destinationId: this.state.party.id,
+      accepted: true
     });
   }
 
-  rejectPing() {
+  rejectNotification() {
     console.log("I've rejected ping");
     this.closeOverlay();
+    this.socket.emit("pong", {
+      id: this.state.party.id,
+      accepted: false
+    });
+    // TODO: handle reject
   }
 
   selectSex(sex) {
@@ -85,17 +98,18 @@ class App extends React.Component {
     console.log("I've choosed a tag:", tag);
     this.closeOverlay();
     this.setState({ me: { ...this.state.me, tag } }, () => {
-      this.socket.emit("intro", this.state.me);
+      this.socket.emit("intro", { ...this.state.me, topic: this.state.me.tag });
     });
   }
 
   handlePlace(place) {
-    console.log("Place has been choosed", place);
+    console.log("Place selected!");
     this.setState({
       place,
       others: [],
       map: { ...this.state.map, center: place.position, zoom: 20 }
     });
+    this.chooseStep("place", place);
     this.createDirection(this.state.me.position, place.position)
       .then(directions => this.setState({ directions }));
   }
@@ -134,8 +148,8 @@ class App extends React.Component {
           start={ ::this.start }
           selectSex={ ::this.selectSex }
           selectTag={ ::this.selectTag }
-          acceptPing={ ::this.acceptPing }
-          rejectPing={ ::this.rejectPing }
+          acceptNotification={ ::this.acceptNotification }
+          rejectNotification={ ::this.rejectNotification }
         />
         <GoogleMapLoader
           containerElement={
@@ -156,7 +170,7 @@ class App extends React.Component {
                 this.state.others.map(attrs => <Marker
                   key={ attrs.id }
                   position={ attrs.position }
-                  onClick={ () => this.pingUser(attrs) }
+                  onClick={ () => this.notifyUser(attrs) }
                 />)
               }
               { this.state.me ? <Marker position={ this.state.me.position } /> : null }
