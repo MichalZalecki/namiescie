@@ -10,7 +10,7 @@ class App extends React.Component {
 
     setTimeout(() => {
       this.handlePing(this.state.others[0])
-    }, 4000);
+    }, 10000);
 
     this.state = {
       me: {
@@ -29,7 +29,9 @@ class App extends React.Component {
         }
       },
       party: {},
-      overlay: {},
+      overlay: {
+        step: "selectSex"
+      },
       others: [
         {
           id: uuid.v4(),
@@ -68,18 +70,39 @@ class App extends React.Component {
 
     this.setState({
       party: person,
-      map: { ...this.state.map, center: person.position, zoom: 18 },
-      overlay: { ...this.state.overlay, step: "handlePing" }
+      map: { ...this.state.map, center: person.position, zoom: 18 }
     });
+    this.chooseStep("handlePing");
   }
 
   acceptPing() {
     console.log("I've accepted ping", this.state.party);
-    this.setState({ overlay: { ...this.state.overlay, step: null } });
+    this.closeOverlay();
   }
 
   rejectPing() {
     console.log("I've rejected ping");
+    this.closeOverlay();
+  }
+
+  selectSex(sex) {
+    console.log("I've choosed a sex:", sex);
+    this.setState({ me: { ...this.state.me, sex } });
+    this.chooseStep("selectTag");
+  }
+
+  selectTag(tag) {
+    console.log("I've choosed a tag:", tag);
+    this.setState({ me: { ...this.state.me, tag } });
+    // load people with matching tag
+    this.closeOverlay();
+  }
+
+  chooseStep(step) {
+    this.setState({overlay: { ...this.state.overlay, step }});
+  }
+
+  closeOverlay() {
     this.setState({ overlay: { ...this.state.overlay, step: null } });
   }
 
@@ -88,6 +111,8 @@ class App extends React.Component {
       <div className={ cls.app }>
         <Overlay
           step={ this.state.overlay.step }
+          selectSex={ ::this.selectSex }
+          selectTag={ ::this.selectTag }
           acceptPing={ ::this.acceptPing }
           rejectPing={ ::this.rejectPing }
         />
