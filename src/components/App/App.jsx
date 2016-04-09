@@ -1,5 +1,5 @@
 import React from "react";
-import { GoogleMapLoader, GoogleMap, Marker, DirectionsRenderer } from "react-google-maps";
+import { GoogleMapLoader, GoogleMap, Marker, DirectionsRenderer, Size } from "react-google-maps";
 import cls   from "./App.css";
 import uuid from "node-uuid";
 import Overlay from "app/components/Overlay/Overlay";
@@ -167,7 +167,12 @@ class App extends React.Component {
               options={{ styles }}
             >
               {
+                var image = {
+                  url: "https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png",
+                  size: new google.maps.Size(32, 32)
+                }
                 this.state.others.map(attrs => <Marker
+                  icon={ image }
                   key={ attrs.id }
                   position={ attrs.position }
                   onClick={ () => this.notifyUser(attrs) }
