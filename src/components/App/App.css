@@ -1,5 +1,11 @@
 @import "normalize.css";
 
+*,
+*:after,
+*:before {
+  box-sizing: border-box;
+}
+
 body, html {
   height: 100%;
   width: 100%;

@@ -1,5 +1,5 @@
 import React from "react";
-import { GoogleMapLoader, GoogleMap, Marker } from "react-google-maps";
+import { GoogleMapLoader, GoogleMap, Marker, DirectionsRenderer } from "react-google-maps";
 import cls   from "./App.css";
 import uuid from "node-uuid";
 import Overlay from "app/components/Overlay/Overlay";
@@ -9,16 +9,19 @@ class App extends React.Component {
     super(props);
 
     setTimeout(() => {
-      this.handlePing(this.state.others[0])
+      this.handlePing(this.state.others[0]);
     }, 10000);
+
+    this.socket = io("//localhost:3000");
+    this.socket.on("people", others => this.setState({ others }));
 
     this.state = {
       me: {
         id: uuid.v4(),
         sex: "male",
         position: {
-          lat: 51.085845,
-          lng: 17.009627,
+          lat: 51.085695,
+          lng: 17.008352,
         }
       },
       map: {
@@ -30,36 +33,16 @@ class App extends React.Component {
       },
       party: null,
       place: null,
+      directions: null,
       overlay: {
-        step: "selectSex"
+        step: "start"
       },
-      others: [
-        {
-          id: uuid.v4(),
-          sex: "female",
-          position: {
-            lat: 51.084812,
-            lng: 17.013667,
-          }
-        },
-        {
-          id: uuid.v4(),
-          sex: "male",
-          position: {
-            lat: 51.087775,
-            lng: 17.013924,
-          }
-        },
-        {
-          id: uuid.v4(),
-          sex: "male",
-          position: {
-            lat: 51.087406,
-            lng: 17.007773,
-          }
-        },
-      ]
+      others: []
     };
+  }
+
+  start() {
+    this.chooseStep("selectSex");
   }
 
   pingUser(person) {
@@ -100,9 +83,10 @@ class App extends React.Component {
 
   selectTag(tag) {
     console.log("I've choosed a tag:", tag);
-    this.setState({ me: { ...this.state.me, tag } });
-    // load people with matching tag
     this.closeOverlay();
+    this.setState({ me: { ...this.state.me, tag } }, () => {
+      this.socket.emit("intro", this.state.me);
+    });
   }
 
   handlePlace(place) {
@@ -112,6 +96,8 @@ class App extends React.Component {
       others: [],
       map: { ...this.state.map, center: place.position, zoom: 20 }
     });
+    this.createDirection(this.state.me.position, place.position)
+      .then(directions => this.setState({ directions }));
   }
 
   chooseStep(step) {
@@ -122,11 +108,30 @@ class App extends React.Component {
     this.setState({ overlay: { ...this.state.overlay, step: null } });
   }
 
+  createDirection(origin, destination) {
+    const directionsService = new google.maps.DirectionsService();
+
+    const request = {
+      origin,
+      destination,
+      travelMode: google.maps.TravelMode.DRIVING
+    };
+
+    return new Promise(resolve => {
+      directionsService.route(request, function(result, status) {
+        if (status == google.maps.DirectionsStatus.OK) {
+          resolve(<DirectionsRenderer defaultDirections={result} />);
+        }
+      });
+    });
+  }
+
   render() {
     return (
       <div className={ cls.app }>
         <Overlay
           step={ this.state.overlay.step }
+          start={ ::this.start }
           selectSex={ ::this.selectSex }
           selectTag={ ::this.selectTag }
           acceptPing={ ::this.acceptPing }
@@ -145,6 +150,7 @@ class App extends React.Component {
             <GoogleMap
               zoom={ this.state.map.zoom }
               center={ this.state.map.center }
+              options={{ styles }}
             >
               {
                 this.state.others.map(attrs => <Marker
@@ -156,6 +162,7 @@ class App extends React.Component {
               { this.state.me ? <Marker position={ this.state.me.position } /> : null }
               { this.state.place ? <Marker position={ this.state.place.position } /> : null }
               { this.state.party ? <Marker position={ this.state.party.position } /> : null }
+              { this.state.directions }
             </GoogleMap>
           }
         />
@@ -165,3 +172,5 @@ class App extends React.Component {
 }
 
 export default App;
+
+const styles = [{"stylers":[{"visibility":"on"},{"saturation":-100},{"gamma":0.54}]},{"featureType":"road","elementType":"labels.icon","stylers":[{"visibility":"off"}]},{"featureType":"water","stylers":[{"color":"#4d4946"}]},{"featureType":"poi","elementType":"labels.icon","stylers":[{"visibility":"off"}]},{"featureType":"poi","elementType":"labels.text","stylers":[{"visibility":"simplified"}]},{"featureType":"road","elementType":"geometry.fill","stylers":[{"color":"#ffffff"}]},{"featureType":"road.local","elementType":"labels.text","stylers":[{"visibility":"simplified"}]},{"featureType":"water","elementType":"labels.text.fill","stylers":[{"color":"#ffffff"}]},{"featureType":"transit.line","elementType":"geometry","stylers":[{"gamma":0.48}]},{"featureType":"transit.station","elementType":"labels.icon","stylers":[{"visibility":"off"}]},{"featureType":"road","elementType":"geometry.stroke","stylers":[{"gamma":7.18}]}]
