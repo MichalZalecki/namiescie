@@ -1,5 +1,11 @@
+@import "normalize.css";
+
+body, html {
+  height: 100%;
+  width: 100%;
+}
+
 .app {
-  &__title {
-    color: purple;
-  }
+  width: 100%;
+  height: 100%;
 }
