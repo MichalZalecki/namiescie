@@ -17,6 +17,31 @@ class App extends React.Component {
     this.socket.on("getNotified", person => this.handleGetNotified(person));
     this.socket.on("place", place => this.handlePlace(place));
 
+    this.maleImg = {
+      url: "",
+      size: new google.maps.Size(32, 32)
+    };
+
+    this.femaleImg = {
+      url: "",
+      size: new google.maps.Size(32, 32)
+    };
+
+    this.meImg = {
+      url: "",
+      size: new google.maps.Size(32, 32)
+    };
+
+    this.partyImg = {
+      url: "",
+      size: new google.maps.Size(32, 32)
+    };
+
+    this.placeImg = {
+      url: "",
+      size: new google.maps.Size(32, 32)
+    };
+
     this.state = {
       me: {
         id: uuid.v4(),
@@ -167,20 +192,16 @@ class App extends React.Component {
               options={{ styles }}
             >
               {
-                var image = {
-                  url: "https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png",
-                  size: new google.maps.Size(32, 32)
-                }
                 this.state.others.map(attrs => <Marker
-                  icon={ image }
+                  icon={ attrs.sex === "male" ? this.maleImg : this.femaleImg }
                   key={ attrs.id }
                   position={ attrs.position }
                   onClick={ () => this.notifyUser(attrs) }
                 />)
               }
-              { this.state.me ? <Marker position={ this.state.me.position } /> : null }
-              { this.state.place ? <Marker position={ this.state.place.position } /> : null }
-              { this.state.party ? <Marker position={ this.state.party.position } /> : null }
+              { this.state.me ? <Marker position={ this.state.me.position } icon={ this.meImg } /> : null }
+              { this.state.place ? <Marker position={ this.state.place.position } icon={ this.placeImg } /> : null }
+              { this.state.party ? <Marker position={ this.state.party.position } icon={ this.partyImg } /> : null }
               { this.state.directions }
             </GoogleMap>
           }
