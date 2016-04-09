@@ -8,38 +8,29 @@ class App extends React.Component {
   constructor(props) {
     super(props);
 
-    // setTimeout(() => {
-    //   this.handlePing(this.state.others[0]);
-    // }, 10000);
-
     this.socket = io("//localhost:3000");
     this.socket.on("people", others => this.setState({ others: others.filter(person => person.id !== this.state.me.id) }));
     this.socket.on("getNotified", person => this.handleGetNotified(person));
     this.socket.on("place", place => this.handlePlace(place));
 
     this.maleImg = {
-      url: "",
-      size: new google.maps.Size(32, 32)
+      url: require("app/img/male.png"),
+      size: new google.maps.Size(255, 255)
     };
 
     this.femaleImg = {
-      url: "",
-      size: new google.maps.Size(32, 32)
+      url: require("app/img/female.png"),
+      size: new google.maps.Size(255, 255)
     };
 
     this.meImg = {
-      url: "",
-      size: new google.maps.Size(32, 32)
-    };
-
-    this.partyImg = {
-      url: "",
-      size: new google.maps.Size(32, 32)
+      url: require("app/img/me.png"),
+      size: new google.maps.Size(255, 255)
     };
 
     this.placeImg = {
-      url: "",
-      size: new google.maps.Size(32, 32)
+      url: require("app/img/place.png"),
+      size: new google.maps.Size(255, 255)
     };
 
     this.state = {
@@ -201,7 +192,7 @@ class App extends React.Component {
               }
               { this.state.me ? <Marker position={ this.state.me.position } icon={ this.meImg } /> : null }
               { this.state.place ? <Marker position={ this.state.place.position } icon={ this.placeImg } /> : null }
-              { this.state.party ? <Marker position={ this.state.party.position } icon={ this.partyImg } /> : null }
+              { this.state.party ? <Marker position={ this.state.party.position } icon={ this.state.party.sex === "male" ? this.maleImg : this.femaleImg } /> : null }
               { this.state.directions }
             </GoogleMap>
           }

@@ -29,6 +29,7 @@ var config = {
   module: {
     loaders: [
       { test: /\.jsx?$/, exclude: /node_modules/, loader: "babel" },
+      { test: /\.(png)$/, loader: "file" },
     ],
   },
 
